@@ -67,7 +67,7 @@ ITEM_PIPELINES = {
 }
 
 #Config DB Mongo
-MONGODB_SERVER = "localhost"
+MONGODB_SERVER = "mongo"
 MONGODB_PORT = 27017
 MONGODB_DB = "Crawl_Recruitment"
 MONGODB_COLLECTION = "Jobs"
