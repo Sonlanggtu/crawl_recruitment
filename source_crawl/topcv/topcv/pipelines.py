@@ -24,7 +24,7 @@ class TopcvPipeline(object):
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
-        print(f"_pipeline__________")
+        #print(f"_pipeline__________")
         ids_record = self.collection.find_one({'id_record': adapter["id_record"]})
 
         if ids_record:

@@ -51,6 +51,7 @@ SPIDER_MIDDLEWARES = {
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
+   "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
    "topcv.middlewares.TopcvDownloaderMiddleware": 543,
 }
 
@@ -67,10 +68,15 @@ ITEM_PIPELINES = {
 }
 
 #Config DB Mongo
+#MONGODB_SERVER = "localhost"
 MONGODB_SERVER = "mongo"
 MONGODB_PORT = 27017
 MONGODB_DB = "Crawl_Recruitment"
 MONGODB_COLLECTION = "Jobs"
+
+#Config get jobs
+LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&salary=&exp=&category="
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -97,3 +103,4 @@ MONGODB_COLLECTION = "Jobs"
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+RETRY_HTTP_CODES = [429]
