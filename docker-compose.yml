@@ -9,7 +9,28 @@ services:
     volumes:
       - "./crawlab/master:/root/.crawlab"
     ports:    
-      - "8080:8080"
+      - "8085:8080"
+    restart: always
+    depends_on:
+      - mongo
+
+  iis-server:
+    image: "appsvc/dotnetcore:6.0_20210409.1"
+    container_name: iis-server
+    restart: always
+    environment:
+      WEBSITE_ROLE_INSTANCE_ID: localRoleInstance
+      WEBSITE_INSTANCE_ID: localInstance
+    # networks:
+      # apitest-lan:
+        # ipv4_address: 10.0.12.10
+      # apitest-wan:
+        # ipv4_address: 172.16.12.10
+    ports:
+      - 8003:8080
+    volumes:
+      - "./IIS/Publish:/home/site/wwwroot"
+      - "./IIS/logs:/var/log"
     depends_on:
       - mongo
 
@@ -62,4 +83,6 @@ services:
       ME_CONFIG_BASICAUTH: false
     depends_on:
       - mongo
+      
+  
   

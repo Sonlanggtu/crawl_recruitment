@@ -1,4 +1,4 @@
-# Scrapy settings for topcv project
+# Scrapy settings for jobsgo project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,14 +7,14 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "topcv"
+BOT_NAME = "jobsgo"
 
-SPIDER_MODULES = ["topcv.spiders"]
-NEWSPIDER_MODULE = "topcv.spiders"
+SPIDER_MODULES = ["jobsgo.spiders"]
+NEWSPIDER_MODULE = "jobsgo.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "topcv (+https://www.topcv.vn)"
+#USER_AGENT = "jobsgo (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -37,22 +37,21 @@ ROBOTSTXT_OBEY = True
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-#    "Accept-Language": "en",
-#}
+DEFAULT_REQUEST_HEADERS = {
+   "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+   "Accept-Language": "en",
+}
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-   "topcv.middlewares.TopcvSpiderMiddleware": 543,
+   "jobsgo.middlewares.JobsgoSpiderMiddleware": 543,
 }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
-   "topcv.middlewares.TopcvDownloaderMiddleware": 543,
+   "jobsgo.middlewares.JobsgoDownloaderMiddleware": 543,
 }
 
 # Enable or disable extensions
@@ -64,20 +63,19 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "topcv.pipelines.TopcvPipeline": 300,
+   "jobsgo.pipelines.JobsgoPipeline": 300,
 }
 
 #Config DB Mongo
-#MONGODB_SERVER = "localhost"
-MONGODB_SERVER = "mongo"
+MONGODB_SERVER = "localhost"
+#MONGODB_SERVER = "mongo"
 MONGODB_PORT = 27017
 MONGODB_DB = "Crawl_Recruitment"
 MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
-LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&salary=&exp=&category="
-
+GET_NUMBER_PAGE = 10
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -104,4 +102,3 @@ LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&sal
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
-RETRY_HTTP_CODES = [429]

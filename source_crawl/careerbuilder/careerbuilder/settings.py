@@ -1,4 +1,4 @@
-# Scrapy settings for topcv project
+# Scrapy settings for careerbuilder project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,14 +7,14 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "topcv"
+BOT_NAME = "careerbuilder"
 
-SPIDER_MODULES = ["topcv.spiders"]
-NEWSPIDER_MODULE = "topcv.spiders"
+SPIDER_MODULES = ["careerbuilder.spiders"]
+NEWSPIDER_MODULE = "careerbuilder.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "topcv (+https://www.topcv.vn)"
+USER_AGENT = "careerbuilder (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -25,7 +25,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -37,22 +37,21 @@ ROBOTSTXT_OBEY = True
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-#    "Accept-Language": "en",
-#}
+DEFAULT_REQUEST_HEADERS = {
+   "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+   "Accept-Language": "en"
+}
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-   "topcv.middlewares.TopcvSpiderMiddleware": 543,
+   "careerbuilder.middlewares.CareerbuilderSpiderMiddleware": 543,
 }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
-   "topcv.middlewares.TopcvDownloaderMiddleware": 543,
+   "careerbuilder.middlewares.CareerbuilderDownloaderMiddleware": 543,
 }
 
 # Enable or disable extensions
@@ -64,20 +63,19 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "topcv.pipelines.TopcvPipeline": 300,
+   "careerbuilder.pipelines.CareerbuilderPipeline": 300,
 }
 
 #Config DB Mongo
-#MONGODB_SERVER = "localhost"
-MONGODB_SERVER = "mongo"
+MONGODB_SERVER = "localhost"
+#MONGODB_SERVER = "mongo"
 MONGODB_PORT = 27017
 MONGODB_DB = "Crawl_Recruitment"
 MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
-LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&salary=&exp=&category="
-
+GET_NUMBER_PAGE = 1 # 1 page have 30 job
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

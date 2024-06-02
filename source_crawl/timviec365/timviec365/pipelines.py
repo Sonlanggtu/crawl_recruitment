@@ -11,8 +11,7 @@ import pymongo
 from scrapy.exceptions import DropItem
 
 
-class TopcvPipeline(object):
-    
+class Timviec365Pipeline:
     def __init__(self):
         settings = get_project_settings()
         connection = pymongo.MongoClient(
@@ -28,7 +27,7 @@ class TopcvPipeline(object):
         ids_record = self.collection.find_one({'alias': adapter["alias"]})
 
         if ids_record:
-           print(f"----------- Duplicate alias: {item['alias']} ----------- ")
+           print(f"----------- Duplicate alias: {item['alias']} ------------------")
             
         else:
             self.collection.insert_one(dict(item))

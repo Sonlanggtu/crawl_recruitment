@@ -1,4 +1,4 @@
-# Scrapy settings for topcv project
+# Scrapy settings for vietnamworks project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,14 +7,14 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "topcv"
+BOT_NAME = "vietnamworks"
 
-SPIDER_MODULES = ["topcv.spiders"]
-NEWSPIDER_MODULE = "topcv.spiders"
+SPIDER_MODULES = ["vietnamworks.spiders"]
+NEWSPIDER_MODULE = "vietnamworks.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "topcv (+https://www.topcv.vn)"
+USER_AGENT = "vietnamworks (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -45,14 +45,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-   "topcv.middlewares.TopcvSpiderMiddleware": 543,
+   "vietnamworks.middlewares.VietnamworksSpiderMiddleware": 543,
 }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
-   "topcv.middlewares.TopcvDownloaderMiddleware": 543,
+   "vietnamworks.middlewares.VietnamworksDownloaderMiddleware": 543,
 }
 
 # Enable or disable extensions
@@ -64,20 +63,19 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "topcv.pipelines.TopcvPipeline": 300,
+   "vietnamworks.pipelines.VietnamworksPipeline": 300,
 }
 
 #Config DB Mongo
-#MONGODB_SERVER = "localhost"
-MONGODB_SERVER = "mongo"
+MONGODB_SERVER = "localhost"
+#MONGODB_SERVER = "mongo"
 MONGODB_PORT = 27017
 MONGODB_DB = "Crawl_Recruitment"
 MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
-LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&salary=&exp=&category="
-
+GET_NUMBER_PAGE = 5 # 1 page = 100 job
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
