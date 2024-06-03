@@ -49,17 +49,17 @@ class Timviec365SpiderSpider(scrapy.Spider):
             res = response.xpath("//script[@id='__NEXT_DATA__']/text()").extract_first()
             res = json.loads(res)
             
-            with open('data.json', 'w') as f:
-               json.dump(res, f)
-            print(res) ## get detail job
+            # with open('data.json', 'w') as f:
+            #    json.dump(res, f)
+            # print(res) ## get detail job
 
             jobs = res['props']['pageProps']['dataSSR']
             for job in jobs:
                 alias = job['new_alias']
                 id = job['new_id']
                 link_job = f'{domain}/{alias}-p{id}.html'
-                #print(f"------------ get_link_job {link_job}----------")
-                yield scrapy.Request(url= link_job, callback=self.get_job_detail)
+                print(f"------------ get_link_job {link_job}----------")
+                yield scrapy.Request(url= link_job, callback=self.get_job_detail_xpath, meta={'job':job})
 
 
             ## get link job from html xpath
@@ -72,11 +72,67 @@ class Timviec365SpiderSpider(scrapy.Spider):
             #     #yield scrapy.Request(url= link_job_full, callback=self.get_job_detail)
 
         except Exception as e:      
-            self.save_error_message(repr(e)) 
+            self.save_error_message(repr(e))
 
-    def get_job_detail(self, response):
+    def get_job_detail_xpath(self, response):
         try:
-            print(f"------------ get_job_detail {response.request.url}----------")
+            print(f"------------ get_job_detail_xpath {response.request.url}----------")
+            jobMeta = response.meta['job']
+
+            branch = response.xpath("//*[@id='detail_new']/div[3]/div/div/div[1]/div[1]/div[1]/div/div[2]/p[1]/a/@title").extract()
+            working_address = response.xpath("//span[@class='diachi']/text()").extract_first()
+            job_description = response.xpath("//div[@id='tab_ttin']/div[3]").extract_first()
+            job_position = response.xpath("//*[@id='tab_ttin']/div[1]/div/div[1]/div[1]/span/text()").extract_first()
+            number_of_vacancies = response.xpath("//*[@id='tab_ttin']/div[1]/div/div[2]/div[1]/span/text()").extract_first()
+            working_form = response.xpath("//*[@id='tab_ttin']/div[1]/div/div[1]/div[2]/span/text()").extract_first()
+            
+            item = JobItem()
+            
+            url = response.request.url
+            item['working_address'] = working_address
+            id = jobMeta['new_id']
+            item['id_record'] = id 
+            item['source'] = _source
+            item['alias'] = str(f"{_source}_{id}")             
+            item['url']  = url
+            item['position']  = jobMeta['new_title'].encode().decode("utf-8")
+            item['created_date'] = datetime.fromtimestamp(int(jobMeta["new_update_time"]))
+            item['exp_date'] = datetime.fromtimestamp(int(jobMeta["new_han_nop"]))
+            item['company_name'] = jobMeta["usc_company"].encode().decode("utf-8")
+            item['company_description'] = ""    
+            item['job_description'] = job_description
+            item['job_position'] =  job_position
+            item['branch'] =  branch #res["industry"] #
+            item['skill_requirements'] = jobMeta['new_yeucau'].encode().decode("utf-8")
+            item['benefit'] = jobMeta["new_quyenloi"].encode().decode("utf-8")
+            item['contract_type'] =  ""
+            item['gender'] = "" #res['new_gioi_tinh'].encode().decode("utf-8")
+            item['working_area'] = jobMeta['new_name_cit'].encode().decode("utf-8")
+            item['current_level'] = ""
+            item['desired_level'] = ""
+            item['experience'] = jobMeta['new_exp']
+            item['skill'] = ""
+            item['job_group_priority'] = "" 
+            item['salary'] = jobMeta['new_money_str']
+            item['level_of_readiness'] = ""
+            item['number_of_vacancies'] = number_of_vacancies
+            item['working_form'] = working_form
+            
+            create_date = datetime.now()
+            #yesterday = datetime.now() - datetime.timedelta(1)
+            item['created_date_crawl_job'] = create_date
+            item['created_date_crawl_job_string'] = create_date.strftime('%d/%m/%Y')
+            yield item
+
+        except Exception as e:      
+            self.save_error_message(repr(e))  
+
+
+
+
+    def get_job_detail_json(self, response):
+        try:
+            print(f"------------ get_job_detail_json {response.request.url}----------")
             #get res json
             res = response.xpath("//script[@id='__NEXT_DATA__']/text()").extract_first()
             print("------res")
