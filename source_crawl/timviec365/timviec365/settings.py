@@ -75,7 +75,7 @@ MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
-GET_NUMBER_PAGE = 5 # 1 page have 30 job
+GET_NUMBER_PAGE = 60 # 1 page have 30 job
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -85,7 +85,7 @@ GET_NUMBER_PAGE = 5 # 1 page have 30 job
 # The maximum download delay to be set in case of high latencies
 #AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
-# each remote server
+# each remote server 
 #AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 #AUTOTHROTTLE_DEBUG = False

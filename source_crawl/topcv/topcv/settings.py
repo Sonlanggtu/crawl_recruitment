@@ -68,8 +68,8 @@ ITEM_PIPELINES = {
 }
 
 #Config DB Mongo
-#MONGODB_SERVER = "localhost"
-MONGODB_SERVER = "mongo"
+MONGODB_SERVER = "localhost"
+#MONGODB_SERVER = "mongo"
 MONGODB_PORT = 27017
 MONGODB_DB = "Crawl_Recruitment"
 MONGODB_COLLECTION = "Job"
@@ -77,6 +77,9 @@ MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
 LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&salary=&exp=&category="
+
+#Config get jobs
+GET_NUMBER_PAGE = 60 # 1 page have 50 job
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)

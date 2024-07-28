@@ -75,7 +75,7 @@ MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
-GET_NUMBER_PAGE = 5 # 1 page = 100 job
+GET_NUMBER_PAGE = 10 # 1 page = 100 job
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

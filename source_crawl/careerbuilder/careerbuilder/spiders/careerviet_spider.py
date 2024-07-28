@@ -50,14 +50,30 @@ class CareervietSpider(scrapy.Spider):
 
             for page in range(1, GET_NUMBER_PAGE + 1, 1):
                 print(f"-------- page {page}")
-                # dataone = 'a:1:{s:4:"PAGE";s:1:"25";}'
-                dataone = f'a%3A1%3A%7Bs%3A4%3A%22PAGE%22%3Bs%3A{page}%3A%2225%22%3B%7D'
-                dataTwo = f'a%3A0%3A%7B%7D'
+                dataone =""; dataTwo = ""
+                if page <= 9:   # s=1 - dataone = 'a:1:{s:4:"PAGE";s:1:"9";}'
+                    dataone = 'a:1:{s:4:"PAGE";s:1:"page_input";}'
+                    dataone = dataone.replace("page_input", f"{page}")
+                    dataTwo = 'a:0:{}'
+                    
+                    
+                elif page >=10 and page <= 99:  #s=2
+                    dataone = 'a:1:{s:4:"PAGE";s:2:"page_input";}'
+                    dataone = dataone.replace("page_input", f"{page}")
+                    dataTwo = 'a:0:{}'
+                elif page >=100: #s=3
+                    dataone = 'a:1:{s:4:"PAGE";s:3:"page_input";}'
+                    dataone = dataone.replace("page_input", f"{page}")
+                    dataTwo = 'a:0:{}'
+
+
                 form_data = {
                     'dataOne': dataone,
                     'dataTwo': dataTwo,
                 }
                 
+                #print("form_data")
+                #print(form_data)
                 yield scrapy.FormRequest(
                     url="https://careerviet.vn/search-jobs",
                     method='POST',
@@ -72,9 +88,11 @@ class CareervietSpider(scrapy.Spider):
     def get_link_jobs(self, response):
         try:
 
-            print(f"------------ get_link_jobs {response.request.url} ----------")
+            print(f"------------ get_link_jobs {response.request.body} ----------")
             print("-------------- get_link_jobs json result ")
+            time.sleep(1)
             res = json.loads(response.body)
+            #print(res)
             jobs = res['data']
 
 
@@ -87,9 +105,11 @@ class CareervietSpider(scrapy.Spider):
             #    json.dump(res, f)
             # print(res) ## get detail job
         
+        
             for job in jobs:
                 link_job = job['LINK_JOB']
 
+                print(link_job)
                 #time.sleep(3)
                 yield scrapy.Request(url= link_job, callback=self.get_job_detail_xpth)
 
@@ -112,12 +132,12 @@ class CareervietSpider(scrapy.Spider):
             exprience = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[3]/div/ul/li[2]/p/text()").extract_first() 
             job_position = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[3]/div/ul/li[3]/p/text()").extract_first() 
             exp_date = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[3]/div/ul/li[4]/p/text()").extract_first() 
-            tilte = response.xpath("/html/head/meta[@property='og:title']").extract_first() 
-            company_name = response.xpath("/html/body/main/section[2]/div/div/div[1]/section/div[2]/div[1]/a").extract_first() 
-            update_date_post = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[2]/div/ul/li[1]/p").extract_first() 
+            tilte = response.xpath("/html/head/meta[@property='og:title']/@content").extract_first() 
+            company_name = response.xpath("/html/body/main/section[2]/div/div/div[1]/section/div[2]/div[1]/a/text()").extract_first() 
+            update_date_post = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[2]/div/ul/li[1]/p/text()").extract_first() 
             branch = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[2]/div/ul/li[2]/p/a/text()").extract()
-            working_form = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[2]/div/ul/li[3]/p").extract_first()
-            working_area = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[1]/div/div/p/a").extract_first()
+            working_form = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[2]/div/ul/li[3]/p/text()").extract_first()
+            working_area = response.xpath("//*[@id='tab-1']/section/div[1]/div/div[1]/div/div/p/a/text()").extract_first()
             benefit = response.xpath("//*[@id='tab-1']/section/div[2]/ul/li/text()").extract()
 
             description = response.xpath("//*[@id='tab-1']/section/div[@class='detail-row reset-bullet']").extract_first()
@@ -130,13 +150,19 @@ class CareervietSpider(scrapy.Spider):
             item['source'] = _source
             item['alias'] = str(f"{_source}_{id}")             
             item['url']  = url
-            item['position']  = tilte
+            item['job_title']  = tilte
             item['created_date'] = update_date_post
             item['exp_date'] = exp_date
             item['company_name'] = company_name
             item['company_description'] = ""    
             item['job_description'] = description
             item['job_position'] =  job_position
+            
+            if branch:
+                branch_strip = []
+                for itemBranch in branch:
+                    branch_strip.append(itemBranch.strip().replace(" ", "").replace("\r\n", " "))
+                branch = branch_strip
             item['branch'] = branch
             item['skill_requirements'] = skill_requirements
             item['benefit'] = benefit
@@ -145,6 +171,8 @@ class CareervietSpider(scrapy.Spider):
             item['working_area'] = working_area
             item['current_level'] = ""
             item['desired_level'] = ""
+            if exprience:
+                exprience = exprience.strip().replace(" ", "").replace("\r\n", " ")
             item['experience'] = exprience
             item['skill'] = ""
             item['job_group_priority'] = "" 

@@ -129,6 +129,14 @@ class TopcvDownloaderMiddleware:
         return None
 
     def process_response(self, request, response, spider):
+        print(f"response status is {response.status}")
+        if response.status == 429:
+            #self.crawler.engine.pause()
+            time.sleep(200) # If the rate limit is renewed in a minute, put 60 seconds, and so on.
+            #self.crawler.engine.unpause()
+            # reason = response_status_message(response.status)
+            # return self._retry(request, reason, spider) or response
+        
         # Called with the response returned from the downloader.
 
         # Must either;

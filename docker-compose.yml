@@ -57,6 +57,38 @@ services:
   #     - "./.crawlab/worker02:/root/.crawlab"
   #   depends_on:
   #     - master
+  
+  # redis-master:
+        # image: 'bitnami/redis:latest'
+        # hostname: redis-master
+        # restart: "no"
+        # environment:
+            # - REDIS_REPLICATION_MODE=master
+            # - REDIS_PASSWORD=MpsStr0ng_passw0rd
+        # networks:
+            # mpmeet-lan:
+                # ipv4_address: 10.0.6.50
+        # volumes:
+            # - ./redis-master/mnt:/mnt
+            # - ./redis-master/redis-data/redis:/opt/bitnami/redis
+            # - ./redis-master/logs:/var/log
+        # ports:
+            # - 29000:6379
+    # rabbitmq-server:
+        # image: 'rabbitmq'
+        # hostname: rabbitmq-server
+        # restart: "no"
+        # environment:
+            # - RABBITMQ_DEFAULT_USER=guest
+            # - RABBITMQ_DEFAULT_PASS=guest
+        # networks:
+            # mpmeet-lan:
+                # ipv4_address: 10.0.6.100
+        # volumes:
+            # - ./rabbitmq-server/mnt:/mnt
+            # - ./rabbitmq-server/logs:/var/log
+        # ports:
+            # - 5672:5672
 
   mongo:
     image: mongo:4.2

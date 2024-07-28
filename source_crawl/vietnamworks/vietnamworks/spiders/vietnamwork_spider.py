@@ -81,7 +81,7 @@ class VietnamworkSpider(scrapy.Spider):
                     item['source'] = _source
                     item['alias'] = str(f"{_source}_{id}")              
                     item['url']  = job["jobUrl"]
-                    item['position']  = job["jobTitle"]
+                    item['job_title']  = job["jobTitle"]
                     item['created_date'] = job["createdOn"]
                     item['exp_date'] = job["expiredOn"]
                     item['company_name'] = job["companyName"]

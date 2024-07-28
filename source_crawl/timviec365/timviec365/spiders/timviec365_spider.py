@@ -43,7 +43,7 @@ class Timviec365SpiderSpider(scrapy.Spider):
     def get_link_jobs(self, response):
         try:
             print(f"------------ get_link_jobs {response.request.url} ----------")
-
+            time.sleep(1)
             ## get link job from json
             #res = response.xpath("//script[@type='application/ld+json'][2]/text()").extract_first()
             res = response.xpath("//script[@id='__NEXT_DATA__']/text()").extract_first()
@@ -58,7 +58,7 @@ class Timviec365SpiderSpider(scrapy.Spider):
                 alias = job['new_alias']
                 id = job['new_id']
                 link_job = f'{domain}/{alias}-p{id}.html'
-                print(f"------------ get_link_job {link_job}----------")
+                print(f"------------ get_link_job {link_job} ")
                 yield scrapy.Request(url= link_job, callback=self.get_job_detail_xpath, meta={'job':job})
 
 
@@ -76,7 +76,7 @@ class Timviec365SpiderSpider(scrapy.Spider):
 
     def get_job_detail_xpath(self, response):
         try:
-            print(f"------------ get_job_detail_xpath {response.request.url}----------")
+            print(f"------------ get_job_detail_xpath {response.request.url} ")
             jobMeta = response.meta['job']
 
             branch = response.xpath("//*[@id='detail_new']/div[3]/div/div/div[1]/div[1]/div[1]/div/div[2]/p[1]/a/@title").extract()
@@ -89,18 +89,22 @@ class Timviec365SpiderSpider(scrapy.Spider):
             item = JobItem()
             
             url = response.request.url
+            if working_address:
+                working_address = working_address.strip().replace("\r\n", " ")
             item['working_address'] = working_address
             id = jobMeta['new_id']
             item['id_record'] = id 
             item['source'] = _source
             item['alias'] = str(f"{_source}_{id}")             
             item['url']  = url
-            item['position']  = jobMeta['new_title'].encode().decode("utf-8")
+            item['job_title']  = jobMeta['new_title'].encode().decode("utf-8")
             item['created_date'] = datetime.fromtimestamp(int(jobMeta["new_update_time"]))
             item['exp_date'] = datetime.fromtimestamp(int(jobMeta["new_han_nop"]))
             item['company_name'] = jobMeta["usc_company"].encode().decode("utf-8")
             item['company_description'] = ""    
             item['job_description'] = job_description
+            if job_position:
+                job_position = job_position.strip().replace("\r\n", " ")
             item['job_position'] =  job_position
             item['branch'] =  branch #res["industry"] #
             item['skill_requirements'] = jobMeta['new_yeucau'].encode().decode("utf-8")
@@ -115,7 +119,12 @@ class Timviec365SpiderSpider(scrapy.Spider):
             item['job_group_priority'] = "" 
             item['salary'] = jobMeta['new_money_str']
             item['level_of_readiness'] = ""
+            if number_of_vacancies:
+                number_of_vacancies = number_of_vacancies.strip().replace("\r\n", " ")
             item['number_of_vacancies'] = number_of_vacancies
+
+            if working_form:
+                working_form = working_form.strip().replace("\r\n", " ")
             item['working_form'] = working_form
             
             create_date = datetime.now()
@@ -154,7 +163,7 @@ class Timviec365SpiderSpider(scrapy.Spider):
             item['source'] = _source
             item['alias'] = str(f"{_source}_{id}")             
             item['url']  = url
-            item['position']  = res['new_title'].encode().decode("utf-8")
+            item['job_title']  = res['new_title'].encode().decode("utf-8")
             item['created_date'] = datetime.fromtimestamp(int(res["new_update_time"]))
             item['exp_date'] = datetime.fromtimestamp(int(res["new_han_nop"]))
             item['company_name'] = res["usc_company"].encode().decode("utf-8")
@@ -167,6 +176,7 @@ class Timviec365SpiderSpider(scrapy.Spider):
                 position = "Nhân viên"
             elif(res["new_cap_bac"] == 5):
                 position = "Trưởng Nhóm"
+                
             item['job_position'] =  position
             item['branch'] =  branch #res["industry"] #
             item['skill_requirements'] = res['new_yeucau'].encode().decode("utf-8")

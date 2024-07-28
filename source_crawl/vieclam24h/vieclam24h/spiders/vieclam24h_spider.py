@@ -38,16 +38,32 @@ class Vieclam24hSpiderSpider(scrapy.Spider):
             for page in range(1, GET_NUMBER_PAGE + 1, 1):
                 url = f"https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page={page}&sort_q=actived_at_by_box%252Cdesc"
                 #print(f"------------ url: {url}----------")
-                yield scrapy.Request(url=url, callback=self.get_link_jobs)
+                yield scrapy.Request(url=url, callback=self.get_link_jobs_json)
 
             # url = "https://vieclam24h.vn/luat-phap-ly-tuan-thu/vinhomes-chuyen-vien-thu-tuc-bds-c25p122id200352075.html"
             # yield scrapy.Request(url=url, callback=self.get_job_detail)
         except Exception as e:      
             self.save_error_message(repr(e)) 
-        
-    def get_link_jobs(self, response):
-        try:
 
+    def get_link_jobs_json(self, response):
+        try:
+            print(f"------------ get_link_page {response.request.url} ----------")
+            res = response.xpath("//script[@id='__NEXT_DATA__']/text()").extract_first()
+            json_res = json.loads(res)
+            status = json_res['props']['initialState']['api']['getJobList']['code']
+            if status == 200:
+                jobs = json_res['props']['initialState']['api']['getJobList']['data']['items']            
+                for job in jobs:
+                    id = job['id']
+                    link = f'/job/{job['title_slug']}-c13p00id{id}.html' 
+                    yield scrapy.Request(url=f'{domain}{link}', callback=self.get_job_detail)
+
+
+        except Exception as e:      
+            self.save_error_message(repr(e))   
+
+    def get_link_jobs_xpath(self, response):
+        try:
             print(f"------------ get_link_jobs {response.request.url} ----------")
             link_jobs = response.xpath("//a[@data-content-target]/@data-content-target").extract()
             for link in link_jobs:
@@ -60,9 +76,9 @@ class Vieclam24hSpiderSpider(scrapy.Spider):
     def get_job_detail(self, response):
         try:
                 
-            print(f"------------ get_job_detail {response.request.url}----------")
+            print(f"------------ get_job_detail: {response.request.url}")
 
-            res = response.xpath("//head/script[@type='application/ld+json'][3]/text()").extract_first()
+            res = response.xpath("//head/script[@type='application/ld+json']/text()").extract_first()
             #print("res")
             res = json.loads(res)
             # with open('data2.json', 'w') as f:
@@ -172,7 +188,7 @@ class Vieclam24hSpiderSpider(scrapy.Spider):
             item['source'] = _source
             item['alias'] = str(f"{_source}_{id}")             
             item['url']  = url
-            item['position']  = res['title']
+            item['job_title']  = res['title']
             item['created_date'] = res["datePosted"]
             item['exp_date'] = res["validThrough"]
             item['company_name'] = res["hiringOrganization"]["name"]
