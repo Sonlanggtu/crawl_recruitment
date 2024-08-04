@@ -1,4 +1,5 @@
 ﻿using Amazon.Auth.AccessControlPolicy;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
@@ -35,22 +36,29 @@ namespace Recruitment.Repository
             _logger = logger;
         }
 
-        public async Task<List<JobErrorResponse>> GetJobErrorByDateAsync(string website, DateTime from, DateTime to)
+        public async Task<List<JobErrorResponse>> GetJobErrorByDateAsync(string idError, string source, DateTime from, DateTime to)
         {
-            _logger.LogInformation($"GetErrorByWebsiteDateAsync: website:{website} - from:{from.ToString("dd/MM/yyyy")} - to:{to.ToString("dd/MM/yyyy")}  ");
+            _logger.LogInformation($"GetErrorByWebsiteDateAsync: idError{idError} - website:{source} - from:{from.ToString("dd/MM/yyyy")} - to:{to.ToString("dd/MM/yyyy")}  ");
             try
             {
                 var listJobError = new List<Job_Error>();
-                if (string.IsNullOrEmpty(website))
+
+
+                if (string.IsNullOrEmpty(source))
                 {
                     listJobError = await _collectionJob_Error.Find(x => x.created_date >= from && x.created_date <= to).ToListAsync();
                 }
                 else
                 {
-                    listJobError = await _collectionJob_Error.Find(x => x.created_date >= from && x.created_date <= to && x.source == website).ToListAsync();
+                    listJobError = await _collectionJob_Error.Find(x => x.created_date >= from && x.created_date <= to && x.source == source).ToListAsync();
                 }
 
-                listJobError = listJobError.OrderByDescending(x=> x.created_date).ToList();
+                if (!string.IsNullOrEmpty(idError))
+                {
+                    listJobError = listJobError.Where(x => x.id_error == idError).ToList();
+                }
+
+                listJobError = listJobError.OrderByDescending(x => x.created_date).ToList();
 
                 var result = listJobError?.Select(x => new JobErrorResponse()
                 {
@@ -59,8 +67,8 @@ namespace Recruitment.Repository
                     CreatedDate = x?.created_date_string,
                     ErrorMessage = x?.error_message,
                     TimeCrawl = x?.created_date.ToString("dd/MM/yyy HH:mm:ss")
-                })
-                .ToList();
+                }).ToList();
+
                 return result;
             }
             catch (Exception ex)
@@ -72,12 +80,13 @@ namespace Recruitment.Repository
 
         }
 
-        public async Task<List<GetJobByDateResponse>> GetJobByDateAsync(DateTime from, DateTime to)
+        public async Task<PaginatedList<DataListJob>> GetJobByDateAsync(DateTime from, DateTime to, int pageIndex, int pageSize)
         {
             try
             {
                 var listError = new List<Job_Error>();
-                var listResult = new List<GetJobByDateResponse>();
+                var listJobByDateResult = new List<GetJobByDateResult>();
+                var jobByDateResponse = new GetJobByDateResponse();
                 listError = await _collectionJob_Error.Find(x => x.created_date >= from && x.created_date <= to).ToListAsync();
 
                 // count record by source
@@ -125,7 +134,7 @@ namespace Recruitment.Repository
                         {
                             foreach (var itemJob in merge.Jobs)
                             {
-                                var result = new GetJobByDateResponse();
+                                var result = new GetJobByDateResult();
                                 if (merge.jobErrors != null && merge.jobErrors.Any(x => x.source == itemJob._id.source))
                                 {
                                     result.HasError = true;
@@ -142,7 +151,7 @@ namespace Recruitment.Repository
                                 result.CreatedDate = merge.CreateDateString;
                                 result.CreatedDate_DateTime = HelperExtension.ConvertStringToDate(merge.CreateDateString);
                                 result.TotalRecordCrawl = itemJob.count;
-                                listResult.Add(result);
+                                listJobByDateResult.Add(result);
                             }
                         }
                         else
@@ -152,32 +161,79 @@ namespace Recruitment.Repository
                                 foreach (var source in Constant.SOURCES)
                                 {
                                     var errorDetail = merge.jobErrors.Where(x => x.source == source)
-                                                                     .OrderByDescending(x=> x.created_date).ToList();
-                                    var result = new GetJobByDateResponse();
+                                                                     .OrderByDescending(x => x.created_date).ToList();
+                                    var result = new GetJobByDateResult();
                                     result.HasError = errorDetail.Any();
                                     result.JobErrors = errorDetail;
                                     result.CreatedDate = merge.CreateDateString;
                                     result.CreatedDate_DateTime = HelperExtension.ConvertStringToDate(merge.CreateDateString);
                                     result.Website = source;
                                     result.TotalRecordCrawl = 0;
-                                    listResult.Add(result);
+                                    listJobByDateResult.Add(result);
                                 }
                             }
                         }
+                    }
+
+
+                    // map list result to list reponse
+                    if (listJobByDateResult.Any())
+                    {
+                        var listDateJobResponse = new List<DataListJob>();
+                        
+                        var createdDatesDistinct = listJobByDateResult.Select(x => x.CreatedDate).Distinct();
+                        foreach (var createdDate in createdDatesDistinct)
+                        {
+                            var jobByDates = listJobByDateResult.Where(x => x.CreatedDate == createdDate);
+                            var jobByDateItem = new DataListJob();
+                            var jobCrawlStatisticals = new List<JobCrawlStatistical>();
+                            foreach (var jobByDate in jobByDates)
+                            {
+                                var jobCrawlItem = new JobCrawlStatistical();
+                                jobCrawlItem.SoBanGhi = jobByDate.TotalRecordCrawl;
+                                jobCrawlItem.Nguon = jobByDate.Website;
+                                jobCrawlItem.TrangThai = jobByDate.HasError;
+                                jobCrawlItem.ChiTietLoi = jobByDate.JobErrors;
+                                jobCrawlStatisticals.Add(jobCrawlItem);
+                            }
+
+                            jobByDateItem.Ngay = createdDate;
+                            jobByDateItem.CreatedDateOrder = HelperExtension.ConvertStringToDate(createdDate);
+                            jobByDateItem.TongSoBanGhi = jobByDates.Sum(x => x.TotalRecordCrawl);
+                            jobByDateItem.DanhSachBanGhi = jobCrawlStatisticals;
+                            listDateJobResponse.Add(jobByDateItem);
+                        }
+
+                        var totalCount = createdDatesDistinct.Count();
+                        var listDateJobResponsePagning = listDateJobResponse.OrderByDescending(x => x.CreatedDateOrder)
+                                                                        .Skip((pageIndex - 1) * pageSize)
+                                                                        .Take(pageSize);
+
+                        return new PaginatedList<DataListJob>
+                        {
+                            DataList = listDateJobResponsePagning,
+                            TotalRow = totalCount,
+                            PageIndex = pageIndex,
+                            PageSize = pageSize
+                        };
+
+                    }
+                    else
+                    {
+                        _logger.LogInformation("listJobByDateResult not found");  
                     }
                 }
                 else
                 {
                     _logger.LogInformation("List Job not found");
-                    return new List<GetJobByDateResponse>();
                 }
-
-                return listResult.OrderByDescending(x=> x.CreatedDate_DateTime).ToList();
+                return new PaginatedList<DataListJob>() { PageIndex = pageIndex, PageSize = pageSize };
+                //return jobByDateResponse;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return new List<GetJobByDateResponse>();
+                return new PaginatedList<DataListJob>() { PageIndex = pageIndex, PageSize = pageSize };
             }
         }
 

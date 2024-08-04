@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Recruitment.Common;
 using Recruitment.Model;
 using Recruitment.Model.Response;
 using Recruitment.Repository;
@@ -19,16 +20,16 @@ namespace Recruitment.Services
             _crawlRepository = crawlRepository;
 
         }
-        public async Task<List<JobErrorResponse>> GetJobErrorByDateAsync(string website, string from, string to)
+        public async Task<List<JobErrorResponse>> GetJobErrorByDateAsync(string idError, string source, string from, string to)
         {
             try
             {
-                _logger.LogInformation($"Start GetJobErrorByDateAsync website: {website} - from: {from} - to: {to}");
+                _logger.LogInformation($"Start GetJobErrorByDateAsync idError:{idError} - source: {source} - from: {from} - to: {to}");
 
                 DateTime fromParsed = DateTime.ParseExact(from, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 DateTime toParsed = DateTime.ParseExact(to, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
-                var res = await _crawlRepository.GetJobErrorByDateAsync(website, fromParsed, toParsed);
+                var res = await _crawlRepository.GetJobErrorByDateAsync(idError, source, fromParsed, toParsed);
                 return res;
             }
             catch (Exception ex)
@@ -39,20 +40,20 @@ namespace Recruitment.Services
            
         }
 
-        public async Task<List<GetJobByDateResponse>> GetJobByDateAsync(string from, string to)
+        public async Task<PaginatedList<DataListJob>> GetJobByDateAsync(string from, string to, int pageIndex, int pageSize)
         {
             try
             {
                 DateTime fromParsed = DateTime.ParseExact(from, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 DateTime toParsed = DateTime.ParseExact(to, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
-                var res = await _crawlRepository.GetJobByDateAsync(fromParsed, toParsed);
+                var res = await _crawlRepository.GetJobByDateAsync(fromParsed, toParsed, pageIndex, pageSize);
                 return res;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"GetJobByDateAsync - {ex.Message}");
-                return new List<GetJobByDateResponse>();
+                return new PaginatedList<DataListJob>() { PageIndex =  pageIndex, PageSize = pageSize};
             }
             
         }

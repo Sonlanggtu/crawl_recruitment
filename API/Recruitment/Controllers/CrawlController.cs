@@ -38,7 +38,7 @@ namespace Recruitment.Controllers
                 return BadRequest(modelError);
             }
 
-            var res = await _crawlService.GetJobErrorByDateAsync(request.Website, request.From, request.To);
+            var res = await _crawlService.GetJobErrorByDateAsync(request.IdError ,request.Source, request.From, request.To);
             return Ok(res);
         }
 
@@ -46,6 +46,7 @@ namespace Recruitment.Controllers
         [HttpGet]
         public async Task<IActionResult> GetJobByDate([FromQuery] GetJobByDateRequest request)
         {
+            _logger.LogInformation("Start GetJobByDateController");
             var validator = new GetJobByDateValidator();
             ValidationResult validationResult = validator.Validate(request);
             if (!validationResult.IsValid)
@@ -58,7 +59,7 @@ namespace Recruitment.Controllers
                 return BadRequest(modelError);
             }
 
-            var res = await _crawlService.GetJobByDateAsync(request.From, request.To);
+            var res = await _crawlService.GetJobByDateAsync(request.From, request.To, request.PageIndex, request.PageSize);
             return Ok(res);
         }
     }

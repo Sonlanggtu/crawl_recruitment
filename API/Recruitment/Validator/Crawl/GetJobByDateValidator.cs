@@ -15,6 +15,13 @@ namespace Recruitment.Validator.Crawl
 
             RuleFor(x => x.To).NotEmpty().WithMessage("To is required")
                               .Must(ValidDate).WithMessage("To must to format dd/MM/yyyy");
+
+            RuleFor(x => x.PageIndex).NotEmpty().WithMessage("PageIndex is required");
+            RuleFor(x => x.PageSize).NotEmpty().WithMessage("PageSize is required");
+
+            //RuleFor(x => x.PageSize).NotEmpty().WithMessage("To is required")
+            //                  .Must(ValidDate).WithMessage("To must to format dd/MM/yyyy");
+
             //RuleFor(x => x.From).NotEqual(0).When(x => x.HasDiscount);
             //RuleFor(x => x.Address).Length(20, 250);
             //RuleFor(x => x.To).Must(ValidDate).WithMessage("To must to format dd/MM/yyyy");
