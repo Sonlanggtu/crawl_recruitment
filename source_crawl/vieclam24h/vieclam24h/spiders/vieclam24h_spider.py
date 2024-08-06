@@ -9,6 +9,7 @@ import json
 from scrapy.selector import Selector
 import pymongo
 import uuid
+from vieclam24h.utilities  import send_email
 
 domain = "https://vieclam24h.vn"
 
@@ -233,4 +234,5 @@ class Vieclam24hSpiderSpider(scrapy.Spider):
         item['created_date'] = create_date
         item['created_date_string'] = create_date.strftime('%d/%m/%Y')
         self.collection_error.insert_one(dict(item))
+        #send_email("notification [spider vieclam24h] - [error]", str(repr(error_message))) 
         return item

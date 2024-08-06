@@ -11,6 +11,7 @@ import json, time
 import uuid
 import datetime 
 import base64 , pprint
+from careerbuilder.utilities  import send_email
 
 class CareervietSpider(scrapy.Spider):
     name = "careerviet_spider"
@@ -83,7 +84,7 @@ class CareervietSpider(scrapy.Spider):
                 )
 
         except Exception as e:      
-                self.save_error_message(repr(e))     
+                self.save_error_message(repr(e))    
 
     def get_link_jobs(self, response):
         try:
@@ -119,7 +120,8 @@ class CareervietSpider(scrapy.Spider):
             #yield scrapy.Request(url= "https://careerviet.vn/vi/tim-viec-lam/chuyen-vien-giam-sat-an-ninh-thong-tin.35C0A86F.html", callback=self.get_job_detail_xpth)
 
         except Exception as e:
-            self.save_error_message(repr(e)) 
+            self.save_error_message(repr(e))
+            #send_email("notification [spider carreerviet] - [error]", str(repr(e)))   
 
             
     def get_job_detail_xpth(self, response):
@@ -189,7 +191,7 @@ class CareervietSpider(scrapy.Spider):
 
         except Exception as e:
             print(repr(e))
-            self.save_error_message(repr(e))
+            self.save_error_message(repr(e))  
 
 
 
@@ -275,5 +277,6 @@ class CareervietSpider(scrapy.Spider):
         item['created_date'] = create_date
         item['created_date_string'] = create_date.strftime('%d/%m/%Y')
         self.collection_error.insert_one(dict(item))
+        #send_email("notification [spider carreerviet] - [error]", str(repr(error_message)))   
         return item
 

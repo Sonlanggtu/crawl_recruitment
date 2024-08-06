@@ -79,8 +79,16 @@ MONGODB_COLLECTION_ERROR = "Job_Error"
 LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&salary=&exp=&category="
 
 #Config get jobs
-GET_NUMBER_PAGE = 60 # 1 page have 50 job
+GET_NUMBER_PAGE = 50 # 1 page have 50 job
 
+CONFIG_MAIL = {
+   "SMTP_SERVER":"smtp.gmail.com",
+   "SMTP_PORT":587,
+   "SMTP_USERNAME":"",
+   "SMTP_PASSWORD":"",
+   "FROM_EMAIL":"",
+   "TO_EMAIL":""
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

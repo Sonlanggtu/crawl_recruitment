@@ -9,7 +9,7 @@ import pymongo
 import json, time
 import uuid
 import datetime 
-
+from topcv.utilities  import send_email
 
 class TopcvSpider(scrapy.Spider):
     name = "topcv_spider"
@@ -34,7 +34,7 @@ class TopcvSpider(scrapy.Spider):
             settings = get_project_settings()
             GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
             print(f"-------------- GET_NUMBER_PAGE : {GET_NUMBER_PAGE}")
-            for page in range(51, GET_NUMBER_PAGE + 1, 1):
+            for page in range(1, GET_NUMBER_PAGE + 1, 1):
                 #time.sleep(5)
                 url = f"https://www.topcv.vn/tim-viec-lam-moi-nhat?sort=new&page={page}"
                 
@@ -51,7 +51,6 @@ class TopcvSpider(scrapy.Spider):
     def get_link_job_xpath(self, response):
         try:
             
-
             print(f"------------ get_link_page {response.request.url} ")
 
             print(f"------------ get_link_page_status {response.status} ")
@@ -216,4 +215,5 @@ class TopcvSpider(scrapy.Spider):
         item['created_date'] = create_date
         item['created_date_string'] = create_date.strftime('%d/%m/%Y')
         self.collection_error.insert_one(dict(item))
+        #send_email("notification [spider topcv] - [error]", str(repr(error_message))) 
         return item

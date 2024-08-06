@@ -2,13 +2,14 @@ import pymongo
 import gzip
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from azure.core.exceptions import ResourceExistsError
-import os
+import os, sys
 
 import json, time
 import uuid
 import datetime 
 import base64 , pprint
 from items import ErrorItem
+from utilities  import send_email
 
 try:  
     with open('env.json', 'r') as file:
@@ -33,14 +34,14 @@ try:
     # get data from MongoDB
 
     current_date = f'{created_date.strftime('%d/%m/%Y')}'
-    print(f"ss >> {current_date}")
+    print(f"current_date >> {current_date}")
 
     arr_source = ["topcv", "careerviet", "jobsgo", "timviec365", "vieclam24h", "vietnamwork"]
 
     pathFolderBaseAzure = "OJV Data"
-    path_folder = os.path.join(f'{os.getcwd()}\{pathFolderBaseAzure}', f'{created_date.strftime('%Y%m%d')}')
+    path_folder = os.path.join(f'{os.getcwd()}\\{pathFolderBaseAzure}', f'{created_date.strftime('%Y%m%d')}')
     for source in arr_source:
-        sub_path_folder = os.path.join(f'{os.getcwd()}\{pathFolderBaseAzure}\{created_date.strftime('%Y%m%d')}', f'{source}')
+        sub_path_folder = os.path.join(f'{os.getcwd()}\\{pathFolderBaseAzure}\\{created_date.strftime('%Y%m%d')}', f'{source}')
         print(f"source cre >>> {sub_path_folder}")
         if not os.path.exists(sub_path_folder):
             os.makedirs(sub_path_folder)
@@ -69,12 +70,11 @@ try:
 
 
         blob_name = f"{source}_{created_date.strftime('%Y%m%d_%H%M%S')}.json"
-        path_file = f'{path_folder}\{source}\{blob_name}'
+        path_file = f'{path_folder}\\{source}\\{blob_name}'
         with open(path_file, 'w', encoding='utf-8') as f:
             json.dump(arrJob, f, ensure_ascii=False, indent=4)
 
-    
-    
+
     # Nén dữ liệu thành file JSON
     # with gzip.open('data.json.gz', 'wt') as f:
     #     json.dump(data, f)
@@ -109,10 +109,12 @@ try:
                 
                 with open(os.path.join(f"{folder[0]}", file), mode='rb') as file_data:
                     blob_obj.upload_blob(file_data, overwrite=overwrite)
-                    print(f" Uploaded File is Sucess - Blob name: {blob_path} - Container name: {container_name}.")
+                    noti_success = (f" Uploaded File is Sucess - Blob name: {blob_path} - Container name: {container_name}.")
+                    print(noti_success)
+                    #send_email("notification [service syncdata to azure blob] - [infor]", noti_success)
             except ResourceExistsError:
                 print('Blob "{0}" already exists'.format(blob_path))
-                print()
+                #send_email("notification [service syncdata to azure blob] - [error]", str(repr(e))) 
                 continue
 
     
@@ -131,4 +133,5 @@ except Exception as e:
     item['error_message'] = str(repr(e)) 
     item['created_date'] = create_date
     item['created_date_string'] = create_date.strftime('%d/%m/%Y')
-    _dbcollectionError.insert_one(dict(item)) 
+    _dbcollectionError.insert_one(dict(item))
+    #send_email("notification [service syncdata to azure blob] - [error]", str(repr(e))) 

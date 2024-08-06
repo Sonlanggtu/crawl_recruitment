@@ -32,9 +32,13 @@ try:
             print("Email sent successfully!")
         except Exception as e:
             print(f"Error: {e}")
-            
-    def gen_alias(source, id_record):
-        return str(f"{source}_{id_record}")
+
+    # Ví dụ sử dụng
+    # send_email(
+    #     subject='Test Email',
+    #     body='This is a test email.',
+    # )
+    
 
 except Exception as e:
     print(repr(e))   

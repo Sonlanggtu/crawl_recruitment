@@ -7,7 +7,7 @@ from scrapy import signals
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
-
+import time
 
 class VietnamworksSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
@@ -82,7 +82,14 @@ class VietnamworksDownloaderMiddleware:
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
-
+        #print(f"response status is {response.status}")
+        if response.status == 429:
+            #self.crawler.engine.pause()
+            time.sleep(200) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
+        elif response.status == 403:
+            #self.crawler.engine.pause()
+            time.sleep(400) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
+                
         # Must either;
         # - return a Response object
         # - return a Request object

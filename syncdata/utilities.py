@@ -2,18 +2,17 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import json, time
-from scrapy.utils.project import get_project_settings
 
 try:
-    settings = get_project_settings()
-    SMTP_SERVER = str(settings['CONFIG_MAIL']['SMTP_SERVER'])
-    SMTP_PORT = str(settings['CONFIG_MAIL']['SMTP_PORT'])
-    SMTP_USERNAME = str(settings['CONFIG_MAIL']['SMTP_USERNAME'])
-    SMTP_PASSWORD = str(settings['CONFIG_MAIL']['SMTP_PASSWORD'])
-    FROM_EMAIL = str(settings['CONFIG_MAIL']['FROM_EMAIL'])
-    TO_EMAIL = str(settings['CONFIG_MAIL']['TO_EMAIL'])
-
-    #print(f'SMTP_SERVER: {SMTP_SERVER} - SMTP_PORT:{SMTP_PORT} - SMTP_USERNAME:{SMTP_USERNAME} - SMTP_PASSWORD:{SMTP_PASSWORD} - FROM_EMAIL: {FROM_EMAIL} - TO_EMAIL:{TO_EMAIL} ')       
+    with open('env.json', 'r') as file:
+            config = json.load(file)
+            SMTP_SERVER = str(config['CONFIG_MAIL']['SMTP_SERVER'])
+            SMTP_PORT = str(config['CONFIG_MAIL']['SMTP_PORT'])
+            SMTP_USERNAME = str(config['CONFIG_MAIL']['SMTP_USERNAME'])
+            SMTP_PASSWORD = str(config['CONFIG_MAIL']['SMTP_PASSWORD'])
+            FROM_EMAIL = str(config['CONFIG_MAIL']['FROM_EMAIL'])
+            TO_EMAIL = str(config['CONFIG_MAIL']['TO_EMAIL'])
+            
 
     def send_email(subject, body):
         # Tạo đối tượng email
@@ -32,9 +31,13 @@ try:
             print("Email sent successfully!")
         except Exception as e:
             print(f"Error: {e}")
-            
-    def gen_alias(source, id_record):
-        return str(f"{source}_{id_record}")
+
+    # Ví dụ sử dụng
+    # send_email(
+    #     subject='Test Email',
+    #     body='This is a test email.',
+    # )
+    
 
 except Exception as e:
     print(repr(e))   

@@ -6,11 +6,15 @@ from scrapy.utils.project import get_project_settings
 from itemadapter import ItemAdapter
 import pymongo
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 import json, time
 import uuid
 import datetime 
 import math
-
+from vietnamworks.utilities  import send_email
 
 class VietnamworkSpider(scrapy.Spider):
     name = "vietnamwork_spider"
@@ -126,5 +130,39 @@ class VietnamworkSpider(scrapy.Spider):
         item['created_date'] = create_date
         item['created_date_string'] = create_date.strftime('%d/%m/%Y')
         self.collection_error.insert_one(dict(item))
+        #send_email("notification [spider vietnamwork] - [error]", str(repr(error_message))) 
         return item
+
+
+
+# # Email sender and receiver
+# sender_email = "your_email@gmail.com"
+# receiver_email = "recipient_email@example.com"
+# password = "your_password"  # For Gmail, consider using an App Password
+
+# # Email content
+# subject = "Test Email from Python"
+# body = "This is a test email sent from a Python script."
+
+# # Create MIME object
+# message = MIMEMultipart()
+# message['From'] = sender_email
+# message['To'] = receiver_email
+# message['Subject'] = subject
+
+# # Attach email body
+# message.attach(MIMEText(body, 'plain'))
+
+# try:
+#     # Set up the server
+#     server = smtplib.SMTP('smtp.gmail.com', 587)
+#     server.starttls()  # Secure the connection
+#     server.login(sender_email, password)  # Login to the server
+#     text = message.as_string()
+#     server.sendmail(sender_email, receiver_email, text)  # Send email
+#     print("Email sent successfully!")
+# except Exception as e:
+#     print(f"Error: {e}")
+# finally:
+#     server.quit()  # Close the connection
 

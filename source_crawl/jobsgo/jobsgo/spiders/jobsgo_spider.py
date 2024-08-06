@@ -10,6 +10,7 @@ import uuid
 import datetime 
 import json
 import requests
+from jobsgo.utilities  import send_email
 
 class JobsgoSpiderSpider(scrapy.Spider):
     name = "jobsgo_spider"
@@ -155,4 +156,5 @@ class JobsgoSpiderSpider(scrapy.Spider):
         item['created_date'] = create_date
         item['created_date_string'] = create_date.strftime('%d/%m/%Y')
         self.collection_error.insert_one(dict(item))
+        #send_email("notification [spider jobsgo] - [error]", str(repr(error_message))) 
         return item

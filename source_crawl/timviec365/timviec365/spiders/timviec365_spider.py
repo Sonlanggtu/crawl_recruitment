@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 import uuid
 import pymongo
+from timviec365.utilities  import send_email
 
 domain = "https://timviec365.vn"
 class Timviec365SpiderSpider(scrapy.Spider):
@@ -216,4 +217,5 @@ class Timviec365SpiderSpider(scrapy.Spider):
         item['created_date'] = create_date
         item['created_date_string'] = create_date.strftime('%d/%m/%Y')
         self.collection_error.insert_one(dict(item))
+        #send_email("notification [spider timviec365] - [error]", str(repr(error_message))) 
         return item
