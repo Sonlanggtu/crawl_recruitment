@@ -5,6 +5,7 @@ using Recruitment.Model;
 using Recruitment.Model.Response;
 using Recruitment.Repository;
 using Recruitment.Repository.Entities;
+using System;
 using System.Globalization;
 
 namespace Recruitment.Services
@@ -44,8 +45,19 @@ namespace Recruitment.Services
         {
             try
             {
-                DateTime fromParsed = DateTime.ParseExact(from, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                DateTime toParsed = DateTime.ParseExact(to, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                DateTime fromParsed = new DateTime(1970, 1, 1, 0, 0, 0);
+                DateTime toParsed = new DateTime(9999, 1, 1, 0, 0, 0);
+
+                if (!string.IsNullOrEmpty(from))
+                {
+                    string fromDateTime = $"{from} 00:00:00";
+                    fromParsed = DateTime.ParseExact(fromDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                }
+                if (!string.IsNullOrEmpty(to))
+                {
+                    string toDateTime = $"{to} 23:59:59";
+                    toParsed = DateTime.ParseExact(toDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                }
 
                 var res = await _crawlRepository.GetJobByDateAsync(fromParsed, toParsed, pageIndex, pageSize);
                 return res;

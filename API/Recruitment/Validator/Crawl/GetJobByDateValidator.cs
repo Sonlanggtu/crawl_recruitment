@@ -10,10 +10,10 @@ namespace Recruitment.Validator.Crawl
         public GetJobByDateValidator()
         {
 
-            RuleFor(x => x.From).NotEmpty().WithMessage("From is required")
+            RuleFor(x => x.From) //.NotEmpty().WithMessage("From is required")
                                 .Must(ValidDate).WithMessage("From must to format dd/MM/yyyy");
 
-            RuleFor(x => x.To).NotEmpty().WithMessage("To is required")
+            RuleFor(x => x.To) //.NotEmpty().WithMessage("To is required")
                               .Must(ValidDate).WithMessage("To must to format dd/MM/yyyy");
 
             RuleFor(x => x.PageIndex).NotEmpty().WithMessage("PageIndex is required");
@@ -30,12 +30,18 @@ namespace Recruitment.Validator.Crawl
         private bool ValidDate(string dateString)
         {
             DateTime parsed;
-
-            bool valid = DateTime.TryParseExact(dateString, "dd/MM/yyyy",
-                                                CultureInfo.InvariantCulture,
-                                                DateTimeStyles.None,
-                                                out parsed);
-            return valid;
+            bool IsValid = false;
+            if (dateString == string.Empty) 
+                return true;
+            else
+            {
+                IsValid = DateTime.TryParseExact(dateString, "dd/MM/yyyy",
+                                                                CultureInfo.InvariantCulture,
+                                                                DateTimeStyles.None,
+                                                                out parsed);
+                return IsValid;
+            }
+            
         }
 
 

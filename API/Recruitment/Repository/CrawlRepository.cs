@@ -95,17 +95,17 @@ namespace Recruitment.Repository
                         new BsonDocument("created_date_crawl_job",
                             new BsonDocument
                             {
-                                { "$gte", from },
-                                { "$lte", to }
+                                { "$gte", from.AddHours(7) }, // utc+7
+                                { "$lte", to.AddHours(7) }    // utc+7
                             }))
-                        .Group(new BsonDocument {
-                                    { "_id",
-                                        new BsonDocument
-                                        {
-                                            { "source", "$source" },
-                                            { "created_date_crawl_job_string", "$created_date_crawl_job_string" }
-                                        }},
-                                    { "count", new BsonDocument("$sum", 1) }
+                    .Group(new BsonDocument {
+                            { "_id",
+                                new BsonDocument
+                                {
+                                    { "source", "$source" },
+                                    { "created_date_crawl_job_string", "$created_date_crawl_job_string" }
+                                }},
+                            { "count", new BsonDocument("$sum", 1) }
                             })
                         .ToList().ToJson();
 
