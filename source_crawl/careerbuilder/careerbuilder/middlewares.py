@@ -89,7 +89,16 @@ class CareerbuilderDownloaderMiddleware:
         if response.status == 429:
             #self.crawler.engine.pause()
             time.sleep(200) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
-
+        elif response.status == 403:
+            #self.crawler.engine.pause()
+            time.sleep(400) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
+        elif response.status == 400:
+            #self.crawler.engine.pause()
+            time.sleep(400) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
+        elif response.status == 104:
+            #self.crawler.engine.pause()
+            time.sleep(400) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
+            
         # Must either;
         # - return a Response object
         # - return a Request object

@@ -71,6 +71,9 @@ class Vieclam24HDownloaderMiddleware:
     def process_request(self, request, spider):
         # Called for each request that goes through the downloader
         # middleware.
+        proxy = spider.settings.get('PROXY')
+        if proxy:
+            request.meta['proxy'] = proxy
 
         # Must either:
         # - return None: continue processing this request

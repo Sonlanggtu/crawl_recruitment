@@ -74,8 +74,15 @@ MONGODB_DB = "Crawl_Recruitment"
 MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
-#Config get jobs
-GET_NUMBER_PAGE = 100  #50job /1 page
+
+# Enable retry middleware
+RETRY_ENABLED = True
+
+# Number of retries
+RETRY_TIMES = 5
+MAX_RETRY_TIMES = 7
+PRIORITY_ADJUST = 1
+
 
 CONFIG_MAIL = {
    "SMTP_SERVER":"smtp.gmail.com",

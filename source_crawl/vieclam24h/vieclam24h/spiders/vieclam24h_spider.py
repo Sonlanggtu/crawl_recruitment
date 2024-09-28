@@ -34,9 +34,11 @@ class Vieclam24hSpiderSpider(scrapy.Spider):
     def start_requests(self):
         try:
             settings = get_project_settings()
-            GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
-            print(f"-------------- GET_NUMBER_PAGE : {GET_NUMBER_PAGE}")
-            for page in range(1, GET_NUMBER_PAGE + 1, 1):
+            #GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
+            #print(f"-------------- GET_NUMBER_PAGE : {GET_NUMBER_PAGE}")
+
+            page_number = 50 # max page 50 page
+            for page in range(page_number, 0, -1):
                 url = f"https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page={page}&sort_q=actived_at_by_box%252Cdesc"
                 #print(f"------------ url: {url}----------")
                 yield scrapy.Request(url=url, callback=self.get_link_jobs_json)
@@ -56,8 +58,8 @@ class Vieclam24hSpiderSpider(scrapy.Spider):
                 jobs = json_res['props']['initialState']['api']['getJobList']['data']['items']            
                 for job in jobs:
                     id = job['id']
-                    link = f'/job/{job['title_slug']}-c13p00id{id}.html' 
-                    yield scrapy.Request(url=f'{domain}{link}', callback=self.get_job_detail)
+                    link = f"/job/{job['title_slug']}-c13p00id{id}.html" 
+                    yield scrapy.Request(url=f"{domain}{link}", callback=self.get_job_detail)
 
 
         except Exception as e:      
@@ -68,7 +70,7 @@ class Vieclam24hSpiderSpider(scrapy.Spider):
             print(f"------------ get_link_jobs {response.request.url} ----------")
             link_jobs = response.xpath("//a[@data-content-target]/@data-content-target").extract()
             for link in link_jobs:
-                yield scrapy.Request(url=f'{domain}{link}', callback=self.get_job_detail)   
+                yield scrapy.Request(url=f"{domain}{link}", callback=self.get_job_detail)   
 
         except Exception as e:      
             self.save_error_message(repr(e))  
@@ -170,16 +172,16 @@ class Vieclam24hSpiderSpider(scrapy.Spider):
             for location in res["jobLocation"]:
                 streetAddress = location["address"]["streetAddress"]
                 if streetAddress != "Toàn khu vực":
-                    streetAddress = f'{streetAddress}, '
+                    streetAddress = f"{streetAddress}, "
                 else:
                     streetAddress = ""
                     
-                address =f'{streetAddress}{location["address"]["addressLocality"]}, {location["address"]["addressRegion"]}' 
+                address =f"{streetAddress}{location['address']['addressLocality']}, {location['address']['addressRegion']}" 
                 arr_address_working.append(address)
 
             # arr_area_working = []
             # for location in res["jobLocation"]:
-            #     area_working =f'{location["address"]["addressRegion"]}' 
+            #     area_working =f"{location["address"]["addressRegion"]}"
             #     arr_area_working.append(area_working)
 
             url = response.request.url

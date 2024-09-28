@@ -10,8 +10,11 @@ import pymongo
 import json, time
 import uuid
 import datetime 
-import base64 , pprint
+import base64 , pprint, requests, math
 from careerbuilder.utilities  import send_email
+from scrapy.http import HtmlResponse
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 class CareervietSpider(scrapy.Spider):
     name = "careerviet_spider"
@@ -35,9 +38,12 @@ class CareervietSpider(scrapy.Spider):
     def start_requests(self):
         try:
             settings = get_project_settings()
-            GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
-            print(f"-------------- GET_NUMBER_PAGE : {GET_NUMBER_PAGE}")
-
+            #GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
+            #self.log(f"-------------- GET_NUMBER_PAGE : {GET_NUMBER_PAGE}")
+            page_number = 0
+            page_number_api = 0
+            page_number_xpath = 0
+            page_size = 50 # 1 page have 50 job
             headers =  {
                     'Accept': '*/*',
                     'Accept-Encoding': 'gzip, deflate, br',
@@ -49,39 +55,137 @@ class CareervietSpider(scrapy.Spider):
                 }
             
 
-            for page in range(1, GET_NUMBER_PAGE + 1, 1):
-                print(f"-------- page {page}")
-                dataone =""; dataTwo = ""
-                if page <= 9:   # s=1 - dataone = 'a:1:{s:4:"PAGE";s:1:"9";}'
-                    dataone = 'a:1:{s:4:"PAGE";s:1:"page_input";}'
-                    dataone = dataone.replace("page_input", f"{page}")
-                    dataTwo = 'a:0:{}'
-                    
-                    
-                elif page >=10 and page <= 99:  #s=2
-                    dataone = 'a:1:{s:4:"PAGE";s:2:"page_input";}'
-                    dataone = dataone.replace("page_input", f"{page}")
-                    dataTwo = 'a:0:{}'
-                elif page >=100: #s=3
-                    dataone = 'a:1:{s:4:"PAGE";s:3:"page_input";}'
-                    dataone = dataone.replace("page_input", f"{page}")
-                    dataTwo = 'a:0:{}'
+            # get page number total
+            url_first = f"https://careerviet.vn/viec-lam/tat-ca-viec-lam-trang-2-vi.html"
+            response = requests.get(url_first, headers=headers)
+            #self.log(response.text)
 
-
-                form_data = {
-                    'dataOne': dataone,
-                    'dataTwo': dataTwo,
-                }
+            if response.text:
+                responseHtml = HtmlResponse(url=url_first, body=response.text, encoding='utf-8')
+                #links = responseHtml.xpath("//*[@id='jobs-side-list-content']/div/div/div/a/@href").extract()
+                number_total_job = responseHtml.xpath("//div[@class='job-found']/div/h1/text()").extract_first()
                 
-                #print("form_data")
-                #print(form_data)
-                yield scrapy.FormRequest(
-                    url="https://careerviet.vn/search-jobs",
-                    method='POST',
-                    headers= headers,
-                    formdata= form_data,
-                    callback=self.get_link_jobs
-                )
+                
+
+                if number_total_job:
+                    number_total_job = number_total_job.replace(" việc làm theo ngày cập nhật mới nhất", "").replace(",", "")
+                    number_total_job = int(number_total_job)
+                    page_number = math.ceil(number_total_job / page_size)
+                #self.log(f"-------- array link: {links}")
+                self.log(f"-------- number_total_job: {number_total_job}")
+                self.log(f"-------- page_number total: {page_number}")  
+
+                
+                # 
+                #page_number = 10
+                #self.log(f"-------- set page_number total: 4")  
+                if page_number != 0:
+                    page_number_xpath = page_number
+                    page_number_api = page_number
+
+
+                    # get job by xpath html
+                    #=====================================
+                    # Define retry strategy
+                    retry_strategy = Retry(
+                        total=10,                     # Số lần thử lại
+                        backoff_factor=1,             # Tăng thời gian chờ giữa mỗi lần retry (1 giây, rồi 2 giây, rồi 4 giây...)
+                        status_forcelist=[429, 500, 502, 503, 504],  # Những mã lỗi sẽ kích hoạt retry
+                    )
+
+                    # Gắn retry strategy vào adapter
+                    adapter = HTTPAdapter(max_retries=retry_strategy)
+
+                    # Tạo session để áp dụng retry logic
+                    session = requests.Session()
+                    session.mount("https://", adapter)
+                    session.mount("http://", adapter)
+
+                    for page in range(page_number_xpath, 0, -1):
+                    
+                        self.log(f"-------- get xpath page: {page}")
+                        url = f"https://careerviet.vn/viec-lam/tat-ca-viec-lam-trang-{page}-vi.html"
+                        self.log(f"-------- get xpath url page: {url}")
+                        time.sleep(1.5)
+
+                        try:
+                            response = session.get(url, headers=headers, timeout=5)  # Giới hạn thời gian chờ
+                            response.raise_for_status()  # Kiểm tra lỗi HTTP
+                            responseHtml = HtmlResponse(url=url, body=response.text, encoding='utf-8')
+                            arrlink = responseHtml.xpath("//*[@id='jobs-side-list-content']/div/div/div[2]/div/h2/a/@href").extract()
+
+                            self.log("arrlink xpath: ")
+                            self.log(arrlink)
+                            if arrlink:
+                                for link_job in arrlink:
+                                    self.log(link_job)
+                                    time.sleep(1.5)
+                                    yield scrapy.Request(url= link_job, callback=self.get_job_detail_xpth)
+
+                            #self.log(f"Success for {url}: {response.status_code}")
+                        except requests.exceptions.RequestException as e:
+                            self.log(f"Request failed for {url}: {e}")
+                        
+                        
+                        
+                        
+                        # response = requests.get(url, headers=headers)
+                        # #self.log(response.text)
+                        # responseHtml = HtmlResponse(url=url, body=response.text, encoding='utf-8')
+                        # arrlink = responseHtml.xpath("//*[@id='jobs-side-list-content']/div/div/div[2]/div/h2/a/@href").extract()
+
+                        # self.log("arrlink xpath: ")
+                        # self.log(arrlink)
+                        # if arrlink:
+                        #    for link_job in arrlink:
+                        #     self.log(link_job)
+                        #     time.sleep(1.5)
+                        #     yield scrapy.Request(url= link_job, callback=self.get_job_detail_xpth)
+
+                
+
+                    # get job by api
+                    for page in range(page_number_api, 0, -1):
+                        self.log(f"-------- get api page: {page}")
+                        dataone =""; dataTwo = ""
+                        if page <= 9:   # s=1 - dataone = 'a:1:{s:4:"PAGE";s:1:"9";}'
+                            dataone = 'a:1:{s:4:"PAGE";s:1:"page_input";}'
+                            dataone = dataone.replace("page_input", f"{page}")
+                            dataTwo = 'a:0:{}'
+
+                        elif page >=10 and page <= 99:  #s=2
+                            dataone = 'a:1:{s:4:"PAGE";s:2:"page_input";}'
+                            dataone = dataone.replace("page_input", f"{page}")
+                            dataTwo = 'a:0:{}'
+                        elif page >=100: #s=3
+                            dataone = 'a:1:{s:4:"PAGE";s:3:"page_input";}'
+                            dataone = dataone.replace("page_input", f"{page}")
+                            dataTwo = 'a:0:{}'
+
+                        # 30 day latest
+                        #dataOne: a:2:{s:4:"PAGE";s:3:"250";s:10:"LASTMODIFY";s:2:"30";}
+                        #dataOne: a:2:{s:4:"PAGE";s:3:"100";s:10:"LASTMODIFY";s:2:"30";}                
+                        #dataOne: a:2:{s:4:"PAGE";s:2:"99";s:10:"LASTMODIFY";s:2:"30";}           
+                        #dataOne: a:2:{s:4:"PAGE";s:2:"20";s:10:"LASTMODIFY";s:2:"30";}                       
+                        #dataOne: a:2:{s:4:"PAGE";s:2:"10";s:10:"LASTMODIFY";s:2:"30";}                     
+                        #dataOne: a:2:{s:4:"PAGE";s:1:"9";s:10:"LASTMODIFY";s:2:"30";}              
+                        #dataOne: a:2:{s:4:"PAGE";s:1:"2";s:10:"LASTMODIFY";s:2:"30";}             
+                        #dataOne: a:2:{s:4:"PAGE";s:1:"1";s:10:"LASTMODIFY";s:2:"30";}
+
+                        form_data = {
+                            'dataOne': dataone,
+                            'dataTwo': dataTwo,
+                        }
+
+                        #self.log("form_data")
+                        #self.log(form_data)
+                        yield scrapy.FormRequest(
+                            url="https://careerviet.vn/search-jobs",
+                            method='POST',
+                            headers= headers,
+                            formdata= form_data,
+                            callback=self.get_link_jobs
+                        )
 
         except Exception as e:      
                 self.save_error_message(repr(e))    
@@ -89,28 +193,28 @@ class CareervietSpider(scrapy.Spider):
     def get_link_jobs(self, response):
         try:
 
-            print(f"------------ get_link_jobs {response.request.body} ----------")
-            print("-------------- get_link_jobs json result ")
-            time.sleep(1)
+            self.log(f"------------ get_link_jobs api {response.request.body} ----------")
+            #self.log("-------------- get_link_jobs json result ")
+            #time.sleep(1)
             res = json.loads(response.body)
-            #print(res)
+            #self.log(res)
             jobs = res['data']
 
 
 
             # for job in jobs:
             #     link_job = job['LINK_JOB']
-            #     print(link_job)
+            #     self.log(link_job)
 
             # with open('data2.json', 'w') as f:
             #    json.dump(res, f)
-            # print(res) ## get detail job
+            # self.log(res) ## get detail job
         
         
             for job in jobs:
                 link_job = job['LINK_JOB']
 
-                print(link_job)
+                self.log(link_job)
                 #time.sleep(3)
                 yield scrapy.Request(url= link_job, callback=self.get_job_detail_xpth)
 
@@ -126,7 +230,7 @@ class CareervietSpider(scrapy.Spider):
             
     def get_job_detail_xpth(self, response):
         try:
-            print(f"------------ get_job_detail {response.request.url}----------")
+            self.log(f"------------ get_job_detail {response.request.url}----------")
             self.log("------------ response -------------- ")
 
             item = JobItem()
@@ -190,7 +294,7 @@ class CareervietSpider(scrapy.Spider):
             yield item
 
         except Exception as e:
-            print(repr(e))
+            self.log(repr(e))
             self.save_error_message(repr(e))  
 
 
@@ -198,7 +302,7 @@ class CareervietSpider(scrapy.Spider):
 
     def get_job_detail_json(self, response):
         try:
-            print(f"------------ get_job_detail {response.request.url}----------")
+            self.log(f"------------ get_job_detail {response.request.url}----------")
             self.log("------------ response -------------- ")
 
             res_json = response.xpath("//main/script[@type='application/ld+json'][1]/text()").extract_first() 
@@ -209,12 +313,12 @@ class CareervietSpider(scrapy.Spider):
             #     f.close()
             
             res = json.loads(res_json)
-            #print(res)
+            #self.log(res)
             # with open('data.json', 'w') as f:
             #     f.write("Woops! I have deleted the content!")
             #     f.close()
                 #json.dump(res, f)
-                #print(res) ## get detail job
+                #self.log(res) ## get detail job
 
             # job = response.meta['job']
             # with open('data2.json', 'w') as f:
@@ -264,7 +368,7 @@ class CareervietSpider(scrapy.Spider):
             yield item
 
         except Exception as e:
-            print(repr(e))
+            self.log(repr(e))
             self.save_error_message(repr(e))   
 
 

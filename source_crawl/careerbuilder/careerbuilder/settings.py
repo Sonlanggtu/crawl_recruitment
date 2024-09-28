@@ -75,7 +75,8 @@ MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
-GET_NUMBER_PAGE = 50 # 1 page have 30 job
+#GET_NUMBER_PAGE_ENABLE = true
+#GET_NUMBER_PAGE = 100 # 1 page have 30 job
 
 
 CONFIG_MAIL = {

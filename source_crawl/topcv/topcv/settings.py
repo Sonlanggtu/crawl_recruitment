@@ -76,10 +76,10 @@ MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
-LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&salary=&exp=&category="
+#LINK_GET_JOB_TOPCV = "https://www.topcv.vn/api-featured-jobs?limit=20&city=0&salary=&exp=&category="
 
 #Config get jobs
-GET_NUMBER_PAGE = 50 # 1 page have 50 job
+#GET_NUMBER_PAGE = 50 # 1 page have 50 job
 
 CONFIG_MAIL = {
    "SMTP_SERVER":"smtp.gmail.com",
@@ -89,6 +89,9 @@ CONFIG_MAIL = {
    "FROM_EMAIL":"",
    "TO_EMAIL":""
 }
+
+#PROXY FORMAT = 'http://username:password@your_proxy_address:port'
+#PROXY = ''
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -116,3 +119,25 @@ REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 RETRY_HTTP_CODES = [429]
+
+
+# Enable retry middleware
+RETRY_ENABLED = True
+
+# Number of retries
+RETRY_TIMES = 15
+MAX_RETRY_TIMES = 20
+PRIORITY_ADJUST = 1
+
+# HTTP status codes to retry (default: [500, 502, 503, 504])
+#RETRY_HTTP_CODES = [500, 502, 503, 504, 408]
+
+# Delay between retries in seconds (optional)
+#RETRY_DELAY = 20000
+
+# RETRY_EXCEPTIONS = (
+#     'scrapy.exceptions.IgnoreRequest',
+#     'scrapy.core.downloader.handlers.http.HttpDownloadHandler',
+#     'socket.timeout',
+#     'requests.exceptions.RequestException',
+# )

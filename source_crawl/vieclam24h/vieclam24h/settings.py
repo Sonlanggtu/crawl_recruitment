@@ -75,7 +75,7 @@ MONGODB_COLLECTION = "Job"
 MONGODB_COLLECTION_ERROR = "Job_Error"
 
 #Config get jobs
-GET_NUMBER_PAGE = 50 # 1 page have 30 job
+#GET_NUMBER_PAGE = 1 # 1 page have 30 job
 
 CONFIG_MAIL = {
    "SMTP_SERVER":"smtp.gmail.com",
@@ -85,6 +85,9 @@ CONFIG_MAIL = {
    "FROM_EMAIL":"",
    "TO_EMAIL":""
 }
+
+#PROXY FORMAT = 'http://username:password@your_proxy_address:port'
+#PROXY = 'http://155.126.176.23:11223'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

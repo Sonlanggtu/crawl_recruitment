@@ -7,8 +7,21 @@ import datetime
 import json
 from datetime import datetime
 import uuid
-import pymongo
+import pymongo, requests
 from timviec365.utilities  import send_email
+from scrapy.http import HtmlResponse
+
+###
+
+import scrapy
+# from selenium import webdriver
+# from selenium.webdriver.chrome.service import Service as ChromeService
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+import time
+
 
 domain = "https://timviec365.vn"
 class Timviec365SpiderSpider(scrapy.Spider):
@@ -28,15 +41,58 @@ class Timviec365SpiderSpider(scrapy.Spider):
         db = connection[settings['MONGODB_DB']]
         self.collection_error = db[settings['MONGODB_COLLECTION_ERROR']]
 
+        #chrome_options = Options()
+        #chrome_options.add_argument('--headless')  # Run in headless mode
+        #chrome_service = ChromeService(executable_path='chromedriver_win64.exe')  # Update path to your chromedriver
+        #self.driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
+        ##self.driver = webdriver.Chrome(options=chrome_options)
+
     def start_requests(self):
         try:
-            settings = get_project_settings()
-            GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
-            print(f"-------------- GET_NUMBER_PAGE : {GET_NUMBER_PAGE}")
-            for page in range(1, GET_NUMBER_PAGE + 1, 1):
-                url = f"https://timviec365.vn/tim-kiem?keyword=&capnhat=1&type_search=2&page={page}" #type = 2 => job mới nhất
-                print(f"------------ Start Page: {page} --- url: {url}----------")
-                yield scrapy.Request(url=url, callback=self.get_link_jobs)
+           settings = get_project_settings()
+           # GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
+           # print(f"-------------- GET_NUMBER_PAGE : {GET_NUMBER_PAGE}")
+        #    page_number = 0
+
+        #    # get page number total
+        #    self.driver.get('https://timviec365.vn/tim-kiem?keyword=&capnhat=1&type_search=2&page=1')  # Replace with your URL
+
+        #    # Wait for the JavaScript content to load (adjust the timeout and condition as needed)
+        #    WebDriverWait(self.driver, 10).until(
+        #       EC.presence_of_element_located((By.ID, 'scr_elm'))
+        #    )
+
+        #    html_text = self.driver.page_source
+        #    if html_text:
+        #       response_html = HtmlResponse(url=self.driver.current_url, body=html_text, encoding='utf-8')
+        #       if response_html:
+        #           page_number_text = response_html.xpath("//*[@id='scr_elm']/ul/li[8]/a/text()").extract_first()
+        #           if  page_number_text:
+        #               page_number = int(page_number_text)
+           
+        #   print(f"page_number: {page_number}")
+            
+           #page_number = 60
+           page_number = 186
+           print(f"set page_number: {page_number}")
+           
+            # get link job
+           if page_number != 0:
+                for page in range(page_number, 1, -1):
+                    #url = f"https://timviec365.vn/tim-kiem?keyword=&capnhat=1&type_search=2&page={page}" #type = 2 => job mới nhất
+                  
+                    #url = f"https://timviec365.vn/tim-kiem?keyword=&capnhat=1&page={page}" #=> Phù hợp nhất  
+                    url = f"https://timviec365.vn/tim-kiem?keyword=&capnhat=2&page={page}" #=> job 1 month tro lai 
+                    #url = f"https://timviec365.vn/tim-kiem?keyword=&capnhat=1&page={page}&type_search=3" #=> luong tot nhất
+                    print(f"------------ Start Page: {page} --- url: {url}----------")
+                    yield scrapy.Request(url=url, callback=self.get_link_jobs)
+
+           print("----------- crawl end ")
+            #########
+            # for page in range(1, GET_NUMBER_PAGE + 1, 1):
+            #     url = f"https://timviec365.vn/tim-kiem?keyword=&capnhat=1&type_search=2&page={page}" #type = 2 => job mới nhất
+            #     print(f"------------ Start Page: {page} --- url: {url}----------")
+            #     yield scrapy.Request(url=url, callback=self.get_link_jobs)
         
         except Exception as e:      
             self.save_error_message(repr(e)) 

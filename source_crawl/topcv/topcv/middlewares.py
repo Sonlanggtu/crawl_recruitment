@@ -117,8 +117,24 @@ class TopcvDownloaderMiddleware:
         return s
 
     def process_request(self, request, spider):
+        print(f"request status is {request}")
         # Called for each request that goes through the downloader
         # middleware.
+        proxy = spider.settings.get('PROXY')
+        if proxy:
+            request.meta['proxy'] = proxy
+
+        max_retry_times = spider.settings.get('MAX_RETRY_TIMES')
+        priority_adjust = spider.settings.get('PRIORITY_ADJUST')
+        #print(f"max_retry_times req >> {max_retry_times}")
+        #print(f"priority_adjust req >> {priority_adjust}")
+        if max_retry_times:
+            #request.meta['max_retry_times'] = max_retry_times
+            self.max_retry_times = max_retry_times
+
+        if priority_adjust:
+            #request.meta['priority_adjust'] = priority_adjust
+            self.priority_adjust = priority_adjust
 
         # Must either:
         # - return None: continue processing this request
@@ -129,13 +145,19 @@ class TopcvDownloaderMiddleware:
         return None
 
     def process_response(self, request, response, spider):
-        print(f"response status is {response.status}")
+        print(f"response url {request.url} \nstatus is {response.status}")
         if response.status == 429:
             #self.crawler.engine.pause()
-            time.sleep(200) # If the rate limit is renewed in a minute, put 60 seconds, and so on.
-            #self.crawler.engine.unpause()
-            # reason = response_status_message(response.status)
-            # return self._retry(request, reason, spider) or response
+            time.sleep(6) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
+
+            reason = response_status_message(response.status)          
+            return RetryMiddleware._retry(self, request, reason, spider)
+        elif response.status == 403:
+            #self.crawler.engine.pause()
+            time.sleep(400) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
+        elif response.status == 400:
+            #self.crawler.engine.pause()
+            time.sleep(400) # If the rate limit is renewed in a minute, put 200 seconds, and so on.
         
         # Called with the response returned from the downloader.
 
@@ -154,6 +176,5 @@ class TopcvDownloaderMiddleware:
         # - return a Response object: stops process_exception() chain
         # - return a Request object: stops process_exception() chain
         pass
-
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)

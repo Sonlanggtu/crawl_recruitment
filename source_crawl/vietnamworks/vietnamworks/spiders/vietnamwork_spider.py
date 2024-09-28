@@ -13,13 +13,13 @@ from email.mime.text import MIMEText
 import json, time
 import uuid
 import datetime 
-import math
+import math, requests
 from vietnamworks.utilities  import send_email
 
 class VietnamworkSpider(scrapy.Spider):
     name = "vietnamwork_spider"
-    allowed_domains = ["www.vietnamworks.com"]
-    start_urls = ["https://www.vietnamworks.com"]
+    allowed_domains = ["www.vietnamworks.com","ms.vietnamworks.com"]
+    start_urls = ["ms.vietnamworks.com"]
 
     global _source
     _source = "vietnamwork"  
@@ -35,18 +35,47 @@ class VietnamworkSpider(scrapy.Spider):
 
     def start_requests(self):
         try:
-            settings = get_project_settings()     
-            GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
-            self.log(f"------GET_NUMBER_PAGE: {GET_NUMBER_PAGE}")
+            settings = get_project_settings()  
+            
+            _page_number : int = 0  #get max page
+            
+            self.log(f"--- find max page number")
+            url = f"https://ms.vietnamworks.com/job-search/v1.0/search"
+            params = {"hitsPerPage": 100, "page": 0}
+            response = requests.post(url, json=params, headers={'Content-Type': 'application/json; charset=UTF-8'})
+            #self.log(f"response {response.status_code}")
+            if response.status_code == 200 and response.json()['data'] != []:
+                self.log(f"response status_code -- {response.status_code}")
+                _page_number = int(response.json()['meta']['nbPages'])
+                self.log(f"--- result max page number: {_page_number}")
+            else:
+                self.log(f"Error status_code: {response.status_code}")
 
-            for i in range(0, GET_NUMBER_PAGE, 1):
-                print(i)
-                url = f"https://ms.vietnamworks.com/job-search/v1.0/search"
-                params = {"hitsPerPage": 100, "page": i}
-                self.log(f"------ PAGE: {i} ---- ")
-                yield scrapy.Request( url, method='POST', 
-                                body=json.dumps(params), 
-                                headers={'Content-Type': 'application/json; charset=UTF-8'}, callback = self.parse)
+
+            if _page_number != 0:
+                _page_number = _page_number -1  # pagestop - 1 because pagestop start = 0
+                for i in range(_page_number, 0, -1):  
+                    self.log(i)
+                    url = f"https://ms.vietnamworks.com/job-search/v1.0/search"
+                    params = {"hitsPerPage": 100, "page": i}
+                    self.log(f"------ PAGE: {i} ---- ")
+                    time.sleep(0.5)
+                    yield scrapy.Request( url, method='POST', 
+                                    body=json.dumps(params), 
+                                    headers={'Content-Type': 'application/json; charset=UTF-8'}, callback = self.parse)
+
+     
+            #old   
+            # GET_NUMBER_PAGE = int(settings['GET_NUMBER_PAGE'])
+            # self.log(f"------GET_NUMBER_PAGE: {GET_NUMBER_PAGE}")		
+            # for i in range(0, GET_NUMBER_PAGE, 1):
+            #     self.log(i)
+            #     url = f"https://ms.vietnamworks.com/job-search/v1.0/search"
+            #     params = {"hitsPerPage": 100, "page": i}
+            #     self.log(f"------ PAGE: {i} ---- ")
+            #     yield scrapy.Request( url, method='POST', 
+            #                     body=json.dumps(params), 
+            #                     headers={'Content-Type': 'application/json; charset=UTF-8'}, callback = self.parse)
                 
         except Exception as e:      
             self.save_error_message(repr(e)) 
@@ -54,12 +83,12 @@ class VietnamworkSpider(scrapy.Spider):
 
     def parse(self, response):
         try:
-            #print("response json ----------")
+            #self.log("response json ----------")
             res = json.loads(response.body)
-            #print(str(res))
-            print("response httpcode:")
+            #self.log(str(res))
+            self.log("response httpcode:")
             http_code_res = res["meta"]["code"]
-            print(str(http_code_res))
+            self.log(str(http_code_res))
             if http_code_res == 200:
                 jobs = res["data"]
                 for job in jobs:
@@ -91,7 +120,7 @@ class VietnamworkSpider(scrapy.Spider):
                     item['company_name'] = job["companyName"]
                     item['company_description'] = job["companyProfile"]
                     item['job_description'] = job["jobDescription"]
-                    item['job_position'] = job["jobTitle"]
+                    item['job_position'] = job["jobLevelVI"]
                     item['branch'] = job["jobFunction"]["parentName"]
                     item['skill_requirements'] = job["jobRequirement"]
                     item['contract_type'] =  ""
@@ -132,37 +161,3 @@ class VietnamworkSpider(scrapy.Spider):
         self.collection_error.insert_one(dict(item))
         #send_email("notification [spider vietnamwork] - [error]", str(repr(error_message))) 
         return item
-
-
-
-# # Email sender and receiver
-# sender_email = "your_email@gmail.com"
-# receiver_email = "recipient_email@example.com"
-# password = "your_password"  # For Gmail, consider using an App Password
-
-# # Email content
-# subject = "Test Email from Python"
-# body = "This is a test email sent from a Python script."
-
-# # Create MIME object
-# message = MIMEMultipart()
-# message['From'] = sender_email
-# message['To'] = receiver_email
-# message['Subject'] = subject
-
-# # Attach email body
-# message.attach(MIMEText(body, 'plain'))
-
-# try:
-#     # Set up the server
-#     server = smtplib.SMTP('smtp.gmail.com', 587)
-#     server.starttls()  # Secure the connection
-#     server.login(sender_email, password)  # Login to the server
-#     text = message.as_string()
-#     server.sendmail(sender_email, receiver_email, text)  # Send email
-#     print("Email sent successfully!")
-# except Exception as e:
-#     print(f"Error: {e}")
-# finally:
-#     server.quit()  # Close the connection
-

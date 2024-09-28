@@ -2,12 +2,15 @@ version: '3.3'
 services:
   master: 
     image: crawlabteam/crawlab:latest
-    container_name: crawlab_example_master
+    container_name: crawlab_master
     environment:
       CRAWLAB_NODE_MASTER: "Y"
       CRAWLAB_MONGO_HOST: "mongo"
     volumes:
-      - "./crawlab/master:/root/.crawlab"
+      #- "./crawlab/master:/root/.crawlab"
+      - "/crawlab/.crawlab/master:/root/.crawlab"  # persistent crawlab metadata
+      - "/crawlab/master:/data"  # persistent crawlab data
+      - "/crawlab/log:/var/log/crawlab" # log persistent 
     ports:    
       - "8085:8080"
     restart: always
@@ -95,7 +98,7 @@ services:
     # environment:
     #   MONGO_INITDB_ROOT_USERNAME: root
     #   MONGO_INITDB_ROOT_PASSWORD: example
-    container_name: crawlab_example_mongo
+    container_name: crawlab_mongo
     volumes:
       - "./mongodbdata:/data/db"
     restart: always
@@ -103,7 +106,7 @@ services:
 
   mongo-express:
     image: mongo-express
-    container_name: crawlab_example_mongo_express
+    container_name: crawlab_mongo_express
     restart: always
     ports:
       - "8081:8081"

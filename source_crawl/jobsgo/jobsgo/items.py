@@ -13,7 +13,7 @@ class JobItem(scrapy.Item):
     id_record = scrapy.Field()
 
     url = scrapy.Field()
-    position = scrapy.Field()
+    job_title = scrapy.Field()
     created_date = scrapy.Field()
     exp_date = scrapy.Field()
     company_name = scrapy.Field()
