@@ -1,0 +1,38 @@
+2024-09-08 16:41:50.283 +00:00 [INF] Now listening on: http://[::]:8080
+2024-09-08 16:41:50.323 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2024-09-08 16:41:50.323 +00:00 [INF] Hosting environment: Production
+2024-09-08 16:41:50.324 +00:00 [INF] Content root path: /home/site/wwwroot/
+2024-09-08 16:42:16.670 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:8003/swagger/index.html - -
+2024-09-08 16:42:16.817 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:8003/swagger/index.html - - - 200 - text/html;charset=utf-8 149.1782ms
+2024-09-08 16:42:16.889 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:8003/swagger/v1/swagger.json - -
+2024-09-08 16:42:16.946 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:8003/swagger/v1/swagger.json - - - 200 - application/json;charset=utf-8 57.6813ms
+2024-09-08 16:42:19.819 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:8003/api/Crawl/GetJobByDate - -
+2024-09-08 16:42:19.823 +00:00 [INF] Executing endpoint 'Recruitment.Controllers.CrawlController.GetJobByDate (Recruitment)'
+2024-09-08 16:42:19.858 +00:00 [INF] Route matched with {action = "GetJobByDate", controller = "Crawl"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetJobByDate(Recruitment.Model.CrawlModel.GetJobByDateRequest) on controller Recruitment.Controllers.CrawlController (Recruitment).
+2024-09-08 16:42:20.654 +00:00 [INF] Start GetJobByDateController
+2024-09-08 16:42:21.724 +00:00 [INF] List Job not found
+2024-09-08 16:42:21.730 +00:00 [INF] Executing OkObjectResult, writing value of type 'Recruitment.Common.PaginatedList`1[[Recruitment.Model.Response.DataListJob, Recruitment, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2024-09-08 16:42:21.738 +00:00 [INF] Executed action Recruitment.Controllers.CrawlController.GetJobByDate (Recruitment) in 1875.8182ms
+2024-09-08 16:42:21.739 +00:00 [INF] Executed endpoint 'Recruitment.Controllers.CrawlController.GetJobByDate (Recruitment)'
+2024-09-08 16:42:21.740 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:8003/api/Crawl/GetJobByDate - - - 200 - application/json;+charset=utf-8 1921.4144ms
+2024-09-08 16:43:51.943 +00:00 [INF] Now listening on: http://[::]:8080
+2024-09-08 16:43:52.086 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2024-09-08 16:43:52.087 +00:00 [INF] Hosting environment: Production
+2024-09-08 16:43:52.087 +00:00 [INF] Content root path: /home/site/wwwroot/
+2024-09-08 16:44:13.765 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:8003/api/Crawl/GetJobByDate - -
+2024-09-08 16:44:13.820 +00:00 [INF] Executing endpoint 'Recruitment.Controllers.CrawlController.GetJobByDate (Recruitment)'
+2024-09-08 16:44:13.858 +00:00 [INF] Route matched with {action = "GetJobByDate", controller = "Crawl"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetJobByDate(Recruitment.Model.CrawlModel.GetJobByDateRequest) on controller Recruitment.Controllers.CrawlController (Recruitment).
+2024-09-08 16:44:14.168 +00:00 [INF] Start GetJobByDateController
+2024-09-08 16:44:14.568 +00:00 [INF] List Job not found
+2024-09-08 16:44:14.574 +00:00 [INF] Executing OkObjectResult, writing value of type 'Recruitment.Common.PaginatedList`1[[Recruitment.Model.Response.DataListJob, Recruitment, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2024-09-08 16:44:14.597 +00:00 [INF] Executed action Recruitment.Controllers.CrawlController.GetJobByDate (Recruitment) in 734.9037ms
+2024-09-08 16:44:14.599 +00:00 [INF] Executed endpoint 'Recruitment.Controllers.CrawlController.GetJobByDate (Recruitment)'
+2024-09-08 16:44:14.602 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:8003/api/Crawl/GetJobByDate - - - 200 - application/json;+charset=utf-8 840.2807ms
+2024-09-08 16:45:11.447 +00:00 [INF] Now listening on: http://[::]:8080
+2024-09-08 16:45:11.490 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2024-09-08 16:45:11.491 +00:00 [INF] Hosting environment: Production
+2024-09-08 16:45:11.492 +00:00 [INF] Content root path: /home/site/wwwroot/
+2024-09-08 16:45:12.724 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:8003/swagger/index.html - -
+2024-09-08 16:45:12.846 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:8003/swagger/index.html - - - 200 - text/html;charset=utf-8 123.8665ms
+2024-09-08 16:45:12.983 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:8003/swagger/v1/swagger.json - -
+2024-09-08 16:45:13.049 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:8003/swagger/v1/swagger.json - - - 200 - application/json;charset=utf-8 65.9532ms
