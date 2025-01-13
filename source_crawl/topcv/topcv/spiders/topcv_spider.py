@@ -68,7 +68,7 @@ class TopcvSpider(scrapy.Spider):
             #     time.sleep(60)
 
             #time.sleep(1)
-            linkJobs = response.xpath("//*[@class='wrapper-content']//div[1]/div[1]/div/div/div[2]/div[1]/div/div[1]/h3/a/@href").extract()
+            linkJobs = response.xpath("//*[@class='wrapper-content']//div[1]/div[1]/div/div/div[1]/div[1]/div/div/h3/a/@href").extract()
             self.log(f"length linkJobs >> {len(linkJobs)}")
             for linkjob in linkJobs:
                 
